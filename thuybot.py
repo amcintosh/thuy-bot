@@ -17,7 +17,6 @@ class ThuyBot:
         self.config = config["DEFAULT"]
         self.slack_client = SlackClient(self.config.get("SLACK_TOKEN"))
 
-
     def connect(self):
         self.slack_client.rtm_connect()
         bot_id = self.slack_client.server.login_data["self"]["id"]
@@ -43,9 +42,12 @@ class ThuyBot:
 
     def run(self):
         try:
+            delay = 0
             for message in self.slack_client.rtm_read():
-                if self.should_respond(message):
+                if self.should_respond(message) and delay < 1:
                     self.process_message(message)
+                    delay = 100
+                delay = delay - 1
         except (WebSocketConnectionClosedException, WebSocketTimeoutException, socket.timeout) as e:
             log.debug(e)
             self.connect()
@@ -58,7 +60,7 @@ class ThuyBot:
         watch_channels = [i.strip() for i in self.config.get("watch_channels").split(",")]
         if message.get("channel") in watch_channels:
             return True
-        
+
     def process_message(self, message):
         if "user" not in message:
             log.warn("message: %s", message)
@@ -72,12 +74,12 @@ class ThuyBot:
         )
         if not resp.get('ok'):
             log.warn(resp)
-        
+
 
 def load_config(config_file, load_logging=True):
     configs = configparser.ConfigParser()
     configs.read(config_file)
-    
+
     if configs.has_option("DEFAULT", "LOG_CONFIG") and load_logging:
         logging.config.fileConfig(configs.get("DEFAULT", "LOG_CONFIG"))
     else:  # pragma: no cover
@@ -87,7 +89,7 @@ def load_config(config_file, load_logging=True):
     log.debug("Config: %s", configs.defaults())
     return configs
 
-        
+
 @click.command()
 @click.option("-c", "--config", default="./config.ini",
               help="Path to the config file.")
