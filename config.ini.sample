@@ -1,12 +1,4 @@
 [DEFAULT]
-
-SLACK_TOKEN = 
-SLACK_BOT_NAME = 'thuy-bot'
-
-WATCH_CHANNEL = '#yourchannel'
-EMOJI_RESPONSE = ''
-
-[DEFAULT]
 LOG_CONFIG = ./logging.ini
 
 SLACK_TOKEN = <YOUR TOKEN>
