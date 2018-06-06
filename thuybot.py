@@ -2,6 +2,7 @@ import click
 import configparser
 import logging
 import logging.config
+import random
 import socket
 import sys
 import time
@@ -58,7 +59,12 @@ class ThuyBot:
         watch_channels = [i.strip() for i in self.config.get("watch_channels").split(",")]
         if message.get("channel") in watch_channels:
             return True
-        
+
+    def get_response(self):
+        responses = [i.strip() for i in self.config.get("emoji_responses").split(",")]
+        return random.choice(responses)
+
+
     def process_message(self, message):
         if "user" not in message:
             log.warn("message: %s", message)
@@ -67,17 +73,17 @@ class ThuyBot:
         resp = self.slack_client.api_call(
             "reactions.add",
             channel=message.get("channel"),
-            name=self.config.get("emoji_response"),
+            name=self.get_response(),
             timestamp=message.get("ts")
         )
         if not resp.get('ok'):
             log.warn(resp)
-        
+
 
 def load_config(config_file, load_logging=True):
     configs = configparser.ConfigParser()
     configs.read(config_file)
-    
+
     if configs.has_option("DEFAULT", "LOG_CONFIG") and load_logging:
         logging.config.fileConfig(configs.get("DEFAULT", "LOG_CONFIG"))
     else:  # pragma: no cover
@@ -87,7 +93,7 @@ def load_config(config_file, load_logging=True):
     log.debug("Config: %s", configs.defaults())
     return configs
 
-        
+
 @click.command()
 @click.option("-c", "--config", default="./config.ini",
               help="Path to the config file.")
