@@ -64,7 +64,9 @@ class ThuyBot:
 
     def get_response(self):
         responses = [i.strip() for i in self.config.get("emoji_responses").split(",")]
-        return random.choice(responses)
+        response = random.choice(responses)
+        log.debug("responding with: %s", response)
+        return response
 
     def process_message(self, message):
         if "user" not in message:
@@ -77,7 +79,7 @@ class ThuyBot:
             name=self.get_response(),
             timestamp=message.get("ts")
         )
-        if not resp.get('ok'):
+        if not resp.get('ok') and resp.get('error') != 'no_item_specified':
             log.warn(resp)
 
 
@@ -110,4 +112,5 @@ def run(config):
 
 
 if __name__ == '__main__':
+    print(__name__)
     run()
