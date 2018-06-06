@@ -18,7 +18,6 @@ class ThuyBot:
         self.config = config["DEFAULT"]
         self.slack_client = SlackClient(self.config.get("SLACK_TOKEN"))
 
-
     def connect(self):
         self.slack_client.rtm_connect()
         bot_id = self.slack_client.server.login_data["self"]["id"]
@@ -44,9 +43,12 @@ class ThuyBot:
 
     def run(self):
         try:
+            delay = 0
             for message in self.slack_client.rtm_read():
-                if self.should_respond(message):
+                if self.should_respond(message) and delay < 1:
                     self.process_message(message)
+                    delay = 100
+                delay = delay - 1
         except (WebSocketConnectionClosedException, WebSocketTimeoutException, socket.timeout) as e:
             log.debug(e)
             self.connect()
@@ -63,7 +65,6 @@ class ThuyBot:
     def get_response(self):
         responses = [i.strip() for i in self.config.get("emoji_responses").split(",")]
         return random.choice(responses)
-
 
     def process_message(self, message):
         if "user" not in message:
