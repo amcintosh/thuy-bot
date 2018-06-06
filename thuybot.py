@@ -9,7 +9,7 @@ import time
 from slackclient import SlackClient
 from websocket import WebSocketConnectionClosedException, WebSocketTimeoutException
 
-log = logging.getLogger(__name__)
+log = logging.getLogger('thuybot')
 
 
 class ThuyBot:
